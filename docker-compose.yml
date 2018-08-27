@@ -1,0 +1,68 @@
+version: "3"
+services:
+    myredis:
+        image: redis:alpine
+        networks:
+          - myappnet
+        volumes:
+          - myredisvol:/data
+        deploy:
+            placement:
+                constraints: [node.role == manager]
+    mydb:
+       image: postgres:10-alpine
+       networks:
+          - myappnet
+       environment:
+          POSTGRES_DB: accessdb
+          POSTGRES_USER : postgres
+          POSTGRES_PASSWORD: postgres
+       deploy:
+           placement:
+               constraints: [node.role == manager]
+    myapp:
+        image: firsttest:1
+        ports:
+            - 8080
+        networks:
+          - myappnet
+        depends_on:
+            - mydb
+            - myredis
+        environment:
+            SERVICE_PORTS: 8080
+            POSTGRES_HOST: //mydb/accessdb
+            JEDIS_HOST: myredis
+        deploy:
+            replicas: 2
+            update_config:
+                parallelism: 1
+            restart_policy:
+                condition: on-failure
+            placement:
+                constraints: [node.role == manager]
+    proxy:
+        image: dockercloud/haproxy
+        depends_on:
+            - myapp
+        environment:
+           BALANCE: leastconn
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        ports:
+            - 8088:80
+        networks:
+            - myappnet
+        deploy:
+            placement:
+                constraints: [node.role == manager]
+networks:
+    myappnet:
+volumes:
+    myredisvol:
+
+
+
+
+      
+
