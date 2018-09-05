@@ -9,7 +9,7 @@ pipeline {
     agent any
     stages {
 
-        stage('build')
+        stage('docker build')
         {
            environment {
               BUILD_IMAGE_REPO_TAG = "${params.IMAGE_REPO_NAME}:${env.BUILD_TAG}"
@@ -18,5 +18,27 @@ pipeline {
                sh "docker build . -t $BUILD_IMAGE_REPO_TAG"
             }
         }
+
+         stage('docker push'){
+              when{
+                expression {
+                  return params.PUSH_DOCKER_IMAGES
+                }
+              }
+              environment {
+                BUILD_IMAGE_REPO_TAG = "${params.IMAGE_REPO_NAME}:${env.BUILD_TAG}"
+              }
+              steps{
+                sh "docker push $BUILD_IMAGE_REPO_TAG"
+                sh "docker push ${params.IMAGE_REPO_NAME}:${params.LATEST_BUILD_TAG}"
+                sh "docker push ${params.IMAGE_REPO_NAME}:$BRANCH_NAME-latest"
+              }
+            }
+
+          stage('Docker Stack Deploy'){
+               steps{
+                  sh "docker stack deploy -c ${params.DOCKER_COMPOSE_FILENAME} ${params.DOCKER_STACK_NAME}"
+                 }
+              }
     }
 }
