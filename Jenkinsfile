@@ -1,6 +1,6 @@
 pipeline {
    parameters {
-      string(name: 'IMAGE_REPO_NAME', defaultValue: '172.16.10.250:50000/myappauto', description: '')
+      string(name: 'IMAGE_REPO_NAME', defaultValue: '172.16.10.250:5000/myappauto', description: '')
       string(name: 'LATEST_BUILD_TAG', defaultValue: 'build-latest', description: '')
       string(name: 'DOCKER_COMPOSE_FILENAME', defaultValue: 'docker-compose.yml', description: '')
       string(name: 'DOCKER_STACK_NAME', defaultValue: 'my_stack', description: '')
