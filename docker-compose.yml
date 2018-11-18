@@ -21,7 +21,7 @@ services:
            placement:
                constraints: [node.role == manager]
     myapp:
-        image: firsttest:1
+        image: 172.16.10.250:5000/myappauto:build-latest
         ports:
             - 8080
         networks:
